@@ -26,6 +26,7 @@ pub async fn publish_handler(body: Event, clients: Clients) -> Result<impl Reply
     .filter(|(_, client)| client.topics.contains(&body.topic))
     .for_each(|(_, client)| {
       if let Some(sender) = &client.sender {
+        // TODO: handle this, could return and error
         let _ = sender.send(Ok(Message::text(body.message.clone())));
       }
     });
@@ -58,12 +59,12 @@ pub async fn unregister_handler(id: String, clients: Clients) -> Result<impl Rep
   Ok(StatusCode::OK)
 }
 
-pub async fn ws_handler(ws: warp::ws::Ws, id: String, clients: Clients) {
+pub async fn ws_handler(ws: warp::ws::Ws, id: String, clients: Clients) -> Result<impl Reply> {
   let client = clients.read().await.get(&id).cloned();
   match client {
     Some(c) => Ok(ws.on_upgrade(move |socket| ws::client_connection(socket, id, clients, c))),
     None => Err(warp::reject::not_found()),
-  };
+  }
 }
 
 pub async fn health_handler() -> Result<impl Reply> {
