@@ -42,6 +42,7 @@ pub async fn client_connection(ws: WebSocket, id: String, clients: Clients, mut 
 }
 
 async fn client_msg(id: &str, msg: Message, clients: &Clients) {
+	// TODO: handle if is the first time that the user connect to ws
 	println!("received message from {} - {:?}", id, msg);
 	let message = match msg.to_str() {
 		Ok(v) => v,
