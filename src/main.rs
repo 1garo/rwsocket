@@ -1,8 +1,9 @@
-use std::{collections::HashMap, result};
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::sync::Arc;
 use tokio::sync::{mpsc, RwLock};
 use warp::{ws::Message, Filter, Rejection};
+
 mod handler;
 mod ws;
 
@@ -41,16 +42,16 @@ async fn main() {
     .and_then(handler::publish_handler);
 
   let ws_route = warp::path("ws")
-    .and(warp::ws())
-    .and(warp::path::param())
-    .and(with_clients(clients.clone()))
-    .and_then(handler::ws_handler);
+      .and(warp::ws())
+      .and(warp::path::param())
+      .and(with_clients(clients.clone()))
+      .and_then(handler::ws_handler);
 
   let routes = health_route
-    .or(register_routes)
-    .or(publish)
-    .or(ws_route)
-    .with(warp::cors().allow_any_origin());
+      .or(register_routes)
+      .or(ws_route)
+      .or(publish)
+      .with(warp::cors().allow_any_origin());
 
   warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;
 }
